@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8" />
+        <title>말풍선 태그 + 이미지 배경 설정</title>
+        <style>
+            body {
+                font-family: sans-serif;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px;
+            }
+
+            .controls {
+                margin-bottom: 16px;
+            }
+
+            .controls input[type="file"] {
+                margin-right: 8px;
+            }
+
+            .image-container {
+                position: relative;
+                width: 400px;
+                height: 600px;
+                background: #eee center center / cover no-repeat;
+                border: 2px solid #ccc;
+                border-radius: 12px;
+                overflow: hidden;
+            }
+
+            .image-container.dragover {
+                border-color: #555;
+                background-color: rgba(0, 0, 0, 0.05);
+            }
+
+            .add-button {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: white;
+                border: 1px solid #aaa;
+                border-radius: 50%;
+                width: 32px;
+                height: 32px;
+                font-size: 20px;
+                font-weight: bold;
+                cursor: pointer;
+                text-align: center;
+                line-height: 30px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                z-index: 10;
+            }
+
+            .tag {
+                position: absolute;
+                background: white;
+                color: black;
+                padding: 8px 12px;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                font-size: 14px;
+                white-space: nowrap;
+                cursor: grab;
+            }
+
+            .tag .close {
+                position: absolute;
+                top: 4px;
+                right: 6px;
+                width: 16px;
+                height: 16px;
+                font-size: 12px;
+                line-height: 14px;
+                text-align: center;
+                border-radius: 50%;
+                background: rgba(200, 200, 200, 0.7);
+                color: #333;
+                cursor: pointer;
+            }
+
+            .tag .rotate {
+                position: absolute;
+                top: 4px;
+                left: 6px;
+                width: 16px;
+                height: 16px;
+                font-size: 12px;
+                line-height: 14px;
+                text-align: center;
+                border-radius: 50%;
+                background: rgba(200, 200, 200, 0.7);
+                color: #333;
+                cursor: pointer;
+            }
+
+            .tag::after {
+                content: "";
+                position: absolute;
+                width: 0;
+                height: 0;
+                border: 10px solid transparent; /* 두껍게 */
+            }
+
+            /* 방향 클래스들 */
+            .arrow-left::after {
+                right: 100%;
+                top: 50%;
+                transform: translateY(-50%);
+                border-right-color: white;
+            }
+
+            .arrow-right::after {
+                left: 100%;
+                top: 50%;
+                transform: translateY(-50%);
+                border-left-color: white;
+            }
+
+            .arrow-top::after {
+                bottom: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                border-bottom-color: white;
+            }
+
+            .arrow-bottom::after {
+                top: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                border-top-color: white;
+            }
+
+            .arrow-top-right::after {
+                bottom: 100%;
+                right: 10px;
+                border-bottom-color: white;
+            }
+
+            .arrow-top-left::after {
+                bottom: 100%;
+                left: 10px;
+                border-bottom-color: white;
+            }
+
+            .arrow-bottom-right::after {
+                top: 100%;
+                right: 10px;
+                border-top-color: white;
+            }
+
+            .arrow-bottom-left::after {
+                top: 100%;
+                left: 10px;
+                border-top-color: white;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>💬 말풍선 태그 + 배경 이미지 설정</h2>
+
+        <div class="controls">
+            <input type="file" id="fileInput" accept="image/*" />
+            <span>또는 이미지를 드래그하여 배경으로 넣어보세요</span>
+        </div>
+
+        <div class="image-container" id="imageContainer">
+            <div class="add-button" id="addBtn">+</div>
+        </div>
+
+        <script>
+            const container = document.getElementById("imageContainer");
+            const addBtn = document.getElementById("addBtn");
+            const fileInput = document.getElementById("fileInput");
+
+            const directions = [
+                "arrow-left",
+                "arrow-right",
+                "arrow-top",
+                "arrow-bottom",
+                "arrow-top-right",
+                "arrow-top-left",
+                "arrow-bottom-right",
+                "arrow-bottom-left",
+            ];
+
+            // 📂 파일 선택으로 이미지 설정
+            fileInput.addEventListener("change", (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    container.style.backgroundImage = `url('${event.target.result}')`;
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // 🖱️ 드래그 앤 드롭으로 이미지 설정
+            container.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                container.classList.add("dragover");
+            });
+
+            container.addEventListener("dragleave", () => {
+                container.classList.remove("dragover");
+            });
+
+            container.addEventListener("drop", (e) => {
+                e.preventDefault();
+                container.classList.remove("dragover");
+
+                const file = e.dataTransfer.files[0];
+                if (!file || !file.type.startsWith("image/")) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    container.style.backgroundImage = `url('${event.target.result}')`;
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // ➕ 태그 추가 버튼
+            addBtn.addEventListener("click", () => {
+                const tag = document.createElement("div");
+                tag.className = "tag arrow-left";
+                tag.innerHTML = `
+        <div class="rotate">↻</div>
+        Yinandyang<br>₩54,000<br>FREE SIZE
+        <div class="close">×</div>
+      `;
+
+                tag.style.left = "120px";
+                tag.style.top = "120px";
+
+                let dirIndex = 0;
+
+                // 회전 버튼
+                tag.querySelector(".rotate").onclick = () => {
+                    tag.classList.remove(directions[dirIndex]);
+                    dirIndex = (dirIndex + 1) % directions.length;
+                    tag.classList.add(directions[dirIndex]);
+                };
+
+                // 삭제 버튼
+                tag.querySelector(".close").onclick = () => tag.remove();
+
+                // 드래그 기능
+                let isDragging = false,
+                    offsetX = 0,
+                    offsetY = 0;
+
+                tag.addEventListener("mousedown", (e) => {
+                    if (
+                        e.target.classList.contains("close") ||
+                        e.target.classList.contains("rotate")
+                    )
+                        return;
+                    isDragging = true;
+                    offsetX = e.offsetX;
+                    offsetY = e.offsetY;
+                });
+
+                document.addEventListener("mousemove", (e) => {
+                    if (!isDragging) return;
+                    const rect = container.getBoundingClientRect();
+                    let x = e.clientX - rect.left - offsetX;
+                    let y = e.clientY - rect.top - offsetY;
+
+                    x = Math.max(0, Math.min(x, rect.width - tag.offsetWidth));
+                    y = Math.max(
+                        0,
+                        Math.min(y, rect.height - tag.offsetHeight)
+                    );
+
+                    tag.style.left = `${x}px`;
+                    tag.style.top = `${y}px`;
+                    // 👉 콘솔에 좌표 출력
+                    console.log(`Tag 위치: x=${x}, y=${y}`);
+                });
+
+                document.addEventListener(
+                    "mouseup",
+                    () => (isDragging = false)
+                );
+
+                container.appendChild(tag);
+            });
+        </script>
+    </body>
+</html>
