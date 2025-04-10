@@ -7,10 +7,18 @@
     (template 태그는 DOM tree로 구성되지 않고 렌더링 될 때 해석되지 않는다.)
 -->
 <template>
-    <div class="redColor">
-        <p>what?</p>
-        <MyComponent />
-    </div>
+    <header>
+        <div class="redColor">
+            <p>what?</p>
+            <MyComponent />
+        </div>
+    </header>
+    <main>
+        <SlotParent />
+        <NamedParent />
+        <DynamicParent />
+    </main>
+    <footer></footer>
 </template>
 
 <!--
@@ -24,6 +32,9 @@
 
 /* src부터 경로 지정 */
 import MyComponent from "@/components/01_component/MyComponent.vue";
+import SlotParent from "./components/02_slotintro/SlotParent.vue";
+import NamedParent from "./components/03_namedslot/NamedParent.vue";
+import DynamicParent from "./components/04_dynamicslot/DynamicParent.vue";
 </script>
 
 <!--
