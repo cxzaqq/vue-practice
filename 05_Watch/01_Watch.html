@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+        <title>Document</title>
+    </head>
+    <body>
+        <!--
+            watch:
+            데이터의 변경을 감지하고 그에 따라 추가 동작을 수행할 수 있다.
+            watch 함수는 vue 인스턴스가 생성될 때 setup 함수 내부에서 사용된다.
+
+            [표현식]
+            watch(propertyName, callback(newVlaue, oldValue) => {})
+            1. propertyName: 변경을 감지할 속성
+            2. callback: 변경 감지 시 수행할 동작
+            3. newValue: 현재 입력된 새로운 값
+            4. oldValue: 입력 이전의 값
+
+            결론은 감시자(watch)는 반응형 변수에 추가 기능을 달아주거나 반응형 변수의 변화 이전 값 활용 시 사용된다.
+        -->
+        <div id="step01">
+            <p>현재 값: {{ currentValue }}</p>
+            <p>이전 값: {{ previousValue }}</p>
+            <p>입력 받는 값: <input type="text" v-model="currentValue" /></p>
+        </div>
+
+        <!-- 감시 대상이 2개 이상일 때 -->
+        <div id="step02">
+            <p>{{ sum }}</p>
+            <p>{{"x:" + x}}</p>
+            <p>{{"y:" + y}}</p>
+            <p>{{"z:" + z}}</p>
+
+            <!-- 세미콜론이 없어도 JS 실행 구문이다. -->
+            <button @click="x++">x++</button>
+            <button @click="y++">y++</button>
+            <button @click="z++">z++</button>
+        </div>
+
+        <script>
+            const { createApp, ref, watch } = Vue;
+
+            createApp({
+                setup() {
+                    const currentValue = ref("");
+                    const previousValue = ref("");
+
+                    /*
+                        currentValue를 주시 하다가 변화 이후의 값 newVal, 변화 이전의 값 oldVal로 넘어옴
+                        첫 번째 인수: 감시 대상
+                        두 번째 인수: 감시 대상의 변화에 따른 추가 기능
+                    */
+                    watch(currentValue, (newVal, oldVal) => {
+                        console.log("newVal", newVal);
+                        console.log("oldVal", oldVal);
+                        console.log("previousValue.value", previousValue.value);
+
+                        previousValue.value = oldVal;
+                    });
+
+                    return {
+                        currentValue,
+                        previousValue,
+                    };
+                },
+            }).mount("#step01");
+
+            createApp({
+                setup() {
+                    const x = ref(0);
+                    const y = ref(0);
+                    const z = ref(0);
+                    const sum = ref(0);
+
+                    // watch([x, y, z], (newVal, oldVal) => {
+                    //     console.log("newVal", newVal);
+                    //     console.log("oldVal", oldVal);
+
+                    //     /* z의 변화에도 동작은 하지만 sum에 변화는 생기지 않음 */
+                    //     sum.value = x.value + y.value;
+                    // });
+
+                    /*
+                        감시 대상이 될 반응형 변수들을 활용한 콜백 함수를 첫 번째 인수로 주고 감시 대상의 의미를 부여.
+                        두 번째 콜백 함수는 첫 번째 콜백 함수의 결과를 전달 받아 실행된다.
+                        (예제에서는 x, y를 감시 대상으로 하여 첫 번째 콜백 함수는 x와 y의 변화에만 동작함)
+                    */
+                    watch(
+                        () => {
+                            console.log("실행되나");
+                            return x.value + y.value;
+                        },
+                        (result) => {
+                            sum.value = result;
+                        }
+                    );
+
+                    /*
+                        watch 사용 시 첫 번째 인자를 메소드로 넣으면 created 시점(뷰 인스턴스가 생성 후)에
+                        한 번 실행해서 추적을 가능하게 함
+                    */
+                    // const test = () => {
+                    //     console.log("test 입니다");
+                    // };
+
+                    // watch(test, () => {});
+
+                    return {
+                        x,
+                        y,
+                        z,
+                        sum,
+                    };
+                },
+            }).mount("#step02");
+        </script>
+    </body>
+</html>
